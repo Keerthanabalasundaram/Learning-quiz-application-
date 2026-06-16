@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head('Upload Study Material')">
+</head>
+<body>
+
+    <!-- Shared Navigation -->
+    <div th:replace="layout :: navbar"></div>
+
+    <div class="container py-5">
+        <div class="row g-4">
+            
+            <!-- 1. File Upload Form -->
+            <div class="col-lg-7">
+                <div class="glass-card p-5 h-100">
+                    <h2 class="brand-font mb-2 text-white">Study Material Upload</h2>
+                    <p class="text-white-50 small mb-4">Select unit levels and bulk upload custom CSVs or feed study notes text files to generate AI MCQs.</p>
+
+                    <!-- Success Alert -->
+                    <div th:if="${param.success}" class="alert alert-success bg-success bg-opacity-10 text-success border-success-subtle py-2 small" role="alert" th:text="${param.success}">
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div th:if="${param.error}" class="alert alert-danger bg-danger bg-opacity-10 text-danger border-danger-subtle py-2 small" role="alert" th:text="${param.error}">
+                    </div>
+
+                    <form th:action="@{/upload/submit}" method="POST" enctype="multipart/form-data">
+                        
+                        <!-- Unit/Level Selector -->
+                        <div class="mb-4">
+                            <label for="unitSelector" class="form-label text-white fw-medium">Target Level (Unit)</label>
+                            <select name="unitId" id="unitSelector" class="form-select bg-dark border-secondary text-white py-3" required>
+                                <option value="" disabled selected>-- Choose level to append questions to --</option>
+                                <option th:each="unit : ${units}" th:value="${unit.id}" th:text="'Level ' + ${unit.levelNumber} + ': ' + ${unit.name}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Upload Type Toggle -->
+                        <div class="mb-4">
+                            <label class="form-label text-white fw-medium d-block">Upload Source Type</label>
+                            
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="uploadType" id="csvRadio" value="csv" checked autocomplete="off">
+                                    <label class="btn btn-outline-primary w-100 py-3 text-start d-flex align-items-center" for="csvRadio">
+                                        <i class="fa-solid fa-file-csv fs-4 me-3"></i>
+                                        <div>
+                                            <span class="d-block fw-bold">CSV Template</span>
+                                            <span style="font-size: 0.75rem; opacity: 0.8;">Bulk import questions</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="uploadType" id="aiTextRadio" value="ai_text" autocomplete="off">
+                                    <label class="btn btn-outline-primary w-100 py-3 text-start d-flex align-items-center" for="aiTextRadio">
+                                        <i class="fa-solid fa-wand-magic-sparkles fs-4 me-3"></i>
+                                        <div>
+                                            <span class="d-block fw-bold">AI MCQ Generator</span>
+                                            <span style="font-size: 0.75rem; opacity: 0.8;">From raw study text</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File input -->
+                        <div class="mb-5">
+                            <label for="fileInput" class="form-label text-white fw-medium">Upload File</label>
+                            <input type="file" name="file" id="fileInput" class="form-control bg-dark border-secondary text-white py-3" required>
+                            <div class="form-text text-white-50 small mt-2">
+                                For CSV: Max 5MB. For Text notes: Max 2MB.
+                            </div>
+                        </div>
+
+                        <!-- Action Submit -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a th:href="@{/upload/template}" class="btn btn-outline-light py-3 px-4">
+                                <i class="fa-solid fa-download me-2"></i> Get CSV Template
+                            </a>
+                            <button type="submit" class="btn btn-primary-glow py-3 px-5">
+                                <i class="fa-solid fa-upload me-2"></i> Upload & Process
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- 2. Past Upload History list -->
+            <div class="col-lg-5">
+                <div class="glass-card p-5 h-100">
+                    <h3 class="brand-font mb-4 text-white"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Upload Logs</h3>
+                    
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-dark table-hover table-borderless align-middle mb-0">
+                            <thead>
+                                <tr class="border-bottom border-secondary border-opacity-50 text-muted small">
+                                    <th>Filename</th>
+                                    <th>Type</th>
+                                    <th>Uploaded</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="upload : ${uploads}">
+                                    <td class="text-white text-truncate" style="max-width: 160px;" th:text="${upload.fileName}" th:title="${upload.fileName}">notes.txt</td>
+                                    <td>
+                                        <span class="badge" th:classappend="${upload.fileType == 'CSV' ? 'bg-primary' : 'bg-info bg-opacity-25 text-info border border-info border-opacity-50'}" th:text="${upload.fileType}">CSV</span>
+                                    </td>
+                                    <td class="text-white-50 small" th:text="${#temporals.format(upload.uploadTime, 'yyyy-MM-dd HH:mm')}">Date</td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(uploads)}">
+                                    <td colspan="3" class="text-center text-muted py-4">No previous uploads found.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Floating Chatbot Widget Shared Fragment -->
+    <div th:replace="layout :: chatbot"></div>
+
+</body>
+</html>

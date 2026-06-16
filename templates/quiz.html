@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head('Quiz Active')">
+</head>
+<body>
+
+    <!-- Shared Navigation -->
+    <div th:replace="layout :: navbar"></div>
+
+    <!-- Global Quiz Timer Bar -->
+    <div class="progress rounded-0" style="height: 6px; background-color: rgba(255, 255, 255, 0.05);">
+        <div id="globalTimerProgress" class="progress-bar progress-bar-glow" role="progressbar" style="width: 100%"></div>
+    </div>
+
+    <!-- Hidden global timer configuration fields for JS -->
+    <input type="hidden" id="globalRemainingSeconds" th:value="${globalRemainingSeconds}">
+    <input type="hidden" id="questionLimitSeconds" th:value="${questionLimitSeconds}">
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            
+            <div class="col-lg-8">
+                
+                <!-- Active Quiz Info Card -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <span class="text-white-50 small uppercase fw-bold" th:text="'Level ' + ${state.levelNumber} + ' / Unit ' + ${state.unitId}">LEVEL 1 / UNIT 1</span>
+                        <h3 class="mb-0 brand-font text-white" th:text="${question.unit.name}">Unit Name</h3>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Difficulty Badge (Adaptive Engine status) -->
+                        <span class="badge px-3 py-2 rounded border border-opacity-50"
+                              th:classappend="${state.currentDifficulty == 'EASY' ? 'bg-success bg-opacity-10 text-success border-success' : (state.currentDifficulty == 'HARD' ? 'bg-danger bg-opacity-10 text-danger border-danger pulse-glow' : 'bg-warning bg-opacity-10 text-warning border-warning')}"
+                              th:text="${state.currentDifficulty}">
+                            MEDIUM
+                        </span>
+                        
+                        <!-- Question Countdown Ring -->
+                        <div class="timer-container">
+                            <svg class="timer-svg" width="80" height="80">
+                                <circle class="timer-circle-bg" cx="40" cy="40" r="35"></circle>
+                                <circle class="timer-circle-fg" cx="40" cy="40" r="35"></circle>
+                            </svg>
+                            <div class="timer-text" th:text="${questionLimitSeconds}">45</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress counter -->
+                <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
+                    <span>Question <strong class="text-white" th:text="${state.currentQuestionIndex + 1}">1</strong> of <strong class="text-white" th:text="${state.totalQuestionsLimit}">10</strong></span>
+                    <span th:text="${(state.currentQuestionIndex * 100) / state.totalQuestionsLimit} + '% Complete'">10% Complete</span>
+                </div>
+                <div class="progress mb-4" style="height: 4px; background-color: rgba(255, 255, 255, 0.05);">
+                    <div class="progress-bar bg-primary" role="progressbar" th:style="'width: ' + ${(state.currentQuestionIndex * 100) / state.totalQuestionsLimit} + '%'"></div>
+                </div>
+
+                <!-- Quiz Form Card -->
+                <div class="glass-card p-5">
+                    <form id="quizForm" th:action="@{/quiz/submit}" method="POST">
+                        
+                        <!-- Question Text -->
+                        <h4 class="mb-5 text-white lh-base fw-medium" th:text="${question.questionText}">
+                            What is the correct syntax to declare an array in Java?
+                        </h4>
+
+                        <!-- Hidden Option Field -->
+                        <input type="hidden" name="selectedOption" id="selectedOptionInput" value="">
+
+                        <!-- Options List -->
+                        <div class="options-container mb-4">
+                            <button type="button" class="btn-glass-option" data-option="A">
+                                <span class="badge bg-dark border border-secondary text-white-50 px-2 py-1 me-3">A</span>
+                                <span th:text="${question.optionA}">Option A</span>
+                            </button>
+                            
+                            <button type="button" class="btn-glass-option" data-option="B">
+                                <span class="badge bg-dark border border-secondary text-white-50 px-2 py-1 me-3">B</span>
+                                <span th:text="${question.optionB}">Option B</span>
+                            </button>
+                            
+                            <button type="button" class="btn-glass-option" data-option="C">
+                                <span class="badge bg-dark border border-secondary text-white-50 px-2 py-1 me-3">C</span>
+                                <span th:text="${question.optionC}">Option C</span>
+                            </button>
+                            
+                            <button type="button" class="btn-glass-option" data-option="D">
+                                <span class="badge bg-dark border border-secondary text-white-50 px-2 py-1 me-3">D</span>
+                                <span th:text="${question.optionD}">Option D</span>
+                            </button>
+                        </div>
+
+                        <!-- Action Controls -->
+                        <div class="d-flex justify-content-between align-items-center mt-5">
+                            <span class="text-muted small"><i class="fa-solid fa-robot me-1 text-primary"></i> Need help? Ask the Chatbot Tutor on the right.</span>
+                            
+                            <button type="submit" class="btn btn-primary-glow px-4 py-3">
+                                Next Question <i class="fa-solid fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Floating Chatbot Widget Shared Fragment -->
+    <div th:replace="layout :: chatbot"></div>
+
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head('Dashboard')">
+</head>
+<body>
+
+    <!-- Shared Navigation -->
+    <div th:replace="layout :: navbar"></div>
+
+    <div class="container py-5">
+        
+        <!-- Welcome Banner -->
+        <div class="glass-card p-4 mb-5 d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <h1 class="brand-font mb-1">Welcome back, <span class="text-primary" th:text="${user.username}">Student</span>!</h1>
+                <p class="text-muted mb-0">Track your progress, unlock CS levels, and consult your chatbot tutor anytime.</p>
+            </div>
+            <div class="mt-3 mt-md-0 bg-dark bg-opacity-50 border border-secondary border-opacity-50 px-4 py-2 rounded">
+                <span class="text-white-50 small">Current Progress:</span>
+                <h4 class="mb-0 text-primary brand-font">Level <span th:text="${user.unlockedLevel}">1</span> Unlocked</h4>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            
+            <!-- 1. Gamified Level Path Map -->
+            <div class="col-lg-8">
+                <div class="glass-card p-4 h-100">
+                    <h4 class="brand-font mb-4"><i class="fa-solid fa-map-location-dot text-primary me-2"></i>Learning Path Levels</h4>
+                    
+                    <div class="level-path">
+                        <th:block th:each="unit : ${units}">
+                            <!-- Level Node determination -->
+                            <a th:href="${unit.levelNumber <= user.unlockedLevel} ? @{/quiz/start(unitId=${unit.id})} : '#'"
+                               class="level-node"
+                               th:classappend="${unit.levelNumber == user.unlockedLevel ? 'current-level unlocked pulse-glow' : (unit.levelNumber < user.unlockedLevel ? 'passed-level unlocked' : 'locked')}">
+                                
+                                <div class="level-circle">
+                                    <span th:text="${unit.levelNumber}">1</span>
+                                </div>
+                                <span class="text-center text-white small fw-bold mb-1" th:text="${unit.name}">Unit 1</span>
+                                <span class="text-center text-muted small" style="font-size: 0.75rem;" th:text="${unit.description}">Description</span>
+                            </a>
+                        </th:block>
+                    </div>
+
+                    <div class="text-center text-muted small mt-4">
+                        <i class="fa-solid fa-circle-info me-1 text-primary"></i> Click on any unlocked level to start a 10-question adaptive quiz. You need <strong>70% accuracy</strong> to unlock the next level.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Analytics Dashboard & Strengths -->
+            <div class="col-lg-4">
+                <div class="glass-card p-4 h-100">
+                    <h4 class="brand-font mb-4"><i class="fa-solid fa-chart-line text-primary me-2"></i>Analytics Overview</h4>
+                    
+                    <!-- Stats Grid -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="bg-dark bg-opacity-40 p-3 rounded border border-secondary-subtle border-opacity-50 text-center">
+                                <h3 class="mb-0 text-primary brand-font" th:text="${totalQuizzes}">0</h3>
+                                <small class="text-muted">Quizzes Taken</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-dark bg-opacity-40 p-3 rounded border border-secondary-subtle border-opacity-50 text-center">
+                                <h3 class="mb-0 text-success brand-font" th:text="${passedQuizzes}">0</h3>
+                                <small class="text-muted">Levels Cleared</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-dark bg-opacity-40 p-3 rounded border border-secondary-subtle border-opacity-50 text-center">
+                                <h3 class="mb-0 text-warning brand-font" th:text="${avgAccuracy} + '%'">0%</h3>
+                                <small class="text-muted">Avg Accuracy</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-dark bg-opacity-40 p-3 rounded border border-secondary-subtle border-opacity-50 text-center">
+                                <h3 class="mb-0 text-info brand-font" th:text="${totalTimeTakenMinutes} + 'm'">0m</h3>
+                                <small class="text-muted">Practice Time</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Recommendations -->
+                    <div class="bg-primary bg-opacity-10 border border-primary border-opacity-30 p-3 rounded">
+                        <h6 class="brand-font text-primary mb-2"><i class="fa-solid fa-lightbulb me-2"></i>Tutor Recommendations</h6>
+                        <ul class="mb-0 ps-3 small text-white-50">
+                            <li class="mb-2" th:each="rec : ${recommendations}" th:text="${rec}">Recommendation</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 3. Past Quiz Results History -->
+        <div class="glass-card p-4">
+            <h4 class="brand-font mb-4"><i class="fa-solid fa-history text-primary me-2"></i>Quiz Session History</h4>
+            
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-borderless align-middle mb-0">
+                    <thead>
+                        <tr class="border-bottom border-secondary border-opacity-50 text-muted small">
+                            <th>Date / Time</th>
+                            <th>Unit Name</th>
+                            <th>Accuracy</th>
+                            <th>Time Spent</th>
+                            <th>Result Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="res : ${results}">
+                            <td class="text-white-50 small" th:text="${#temporals.format(res.createdAt, 'yyyy-MM-dd HH:mm')}">Date</td>
+                            <td class="fw-semibold text-white" th:text="${res.quiz.unit.name}">Unit 1</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="fw-bold me-2" th:text="${res.accuracyPercentage} + '%'">80%</span>
+                                    <div class="progress w-50" style="height: 6px; background-color: rgba(255, 255, 255, 0.05);">
+                                        <div class="progress-bar progress-bar-glow" role="progressbar" th:style="'width: ' + ${res.accuracyPercentage} + '%'"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-white-50 small" th:text="${res.timeTakenSeconds} + 's'">Time</td>
+                            <td>
+                                <span th:if="${res.passed}" class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-50 px-2 py-1 small rounded">
+                                    <i class="fa-solid fa-circle-check me-1"></i> Passed
+                                </span>
+                                <span th:unless="${res.passed}" class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-50 px-2 py-1 small rounded">
+                                    <i class="fa-solid fa-circle-xmark me-1"></i> Retry
+                                </span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(results)}">
+                            <td colspan="5" class="text-center text-muted py-4">No quiz attempts recorded yet. Click on Level 1 above to begin!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Floating Chatbot Widget Shared Fragment -->
+    <div th:replace="layout :: chatbot"></div>
+
+</body>
+</html>
