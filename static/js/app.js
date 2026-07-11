@@ -74,24 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 clearInterval(globalTimer);
                 console.log("Global quiz session timer expired! Force completing...");
                 
-                // Submit overall timeout to controller
-                const timeoutForm = document.createElement("form");
-                timeoutForm.method = "POST";
-                timeoutForm.action = "/quiz/complete?timeout=true";
-                
-                // Insert CSRF Token if available
-                const csrfMeta = document.querySelector("meta[name='_csrf']");
-                const csrfHeaderMeta = document.querySelector("meta[name='_csrf_header']");
-                if (csrfMeta && csrfHeaderMeta) {
-                    const csrfInput = document.createElement("input");
-                    csrfInput.type = "hidden";
-                    csrfInput.name = csrfHeaderMeta.content;
-                    csrfInput.value = csrfMeta.content;
-                    timeoutForm.appendChild(csrfInput);
-                }
-                
-                document.body.appendChild(timeoutForm);
-                timeoutForm.submit();
+                // Simple and safe GET redirection to matching controller path
+                window.location.href = "/quiz/complete?timeout=true";
             }
         }, 1000);
     }
