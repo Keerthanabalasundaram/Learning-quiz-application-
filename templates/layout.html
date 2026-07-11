@@ -1,96 +1,203 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="h-full">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- CSRF Meta Tags for AJAX calls (Security compatibility) -->
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     
-    <title th:text="${title} + ' - Learning Quiz App'"></title>
+    <title th:text="${title} + ' - Learning Quiz Application'"></title>
     
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom Glassmorphic Dark-Theme CSS -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        darkbg: '#070a13',
+                        darkcard: 'rgba(22, 28, 48, 0.65)',
+                        bordercolor: 'rgba(255, 255, 255, 0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom Glassmorphic CSS for widgets (chatbot, levels) -->
     <link rel="stylesheet" th:href="@{/css/style.css}">
     
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        }
+        .gradient-btn:hover {
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen bg-[#070a13] text-gray-100 font-sans">
 
-    <!-- 1. Shared Navigation Bar -->
-    <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-transparent border-bottom border-secondary-subtle">
-        <div class="container py-2">
-            <a class="navbar-brand brand-font" th:href="@{/dashboard}">
-                <i class="fa-solid fa-graduation-cap me-2"></i>Learning Quiz App
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link px-3" th:href="@{/dashboard}">
-                            <i class="fa-solid fa-gauge me-1"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3" th:href="@{/upload}">
-                            <i class="fa-solid fa-cloud-arrow-up me-1"></i> Study Material
-                        </a>
-                    </li>
-                    <li class="nav-item ms-lg-3">
-                        <span class="text-white-50 me-2" sec:authorize="isAuthenticated()">
-                            <i class="fa-solid fa-user me-1 text-primary"></i> <span sec:authentication="name">User</span>
-                        </span>
-                    </li>
-                    <li class="nav-item ms-lg-2">
-                        <form th:action="@{/logout}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-danger btn-sm">
-                                <i class="fa-solid fa-right-from-bracket"></i> Logout
+    <!-- Shared Navigation Bar -->
+    <nav th:fragment="navbar" class="border-b border-white/10 bg-[#070a13]/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a class="flex items-center text-2xl font-extrabold font-outfit gradient-text" th:href="@{/dashboard}">
+                        <i data-lucide="graduation-cap" class="w-8 h-8 mr-2 stroke-[2.5] text-indigo-500"></i>
+                        <span>Learning Quiz Application</span>
+                    </a>
+                </div>
+                
+                <!-- Nav Links (Desktop) -->
+                <div class="hidden md:flex items-center space-x-6" sec:authorize="isAuthenticated()">
+                    <a th:href="@{/dashboard}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 flex items-center gap-1.5">
+                        <i data-lucide="home" class="w-4.5 h-4.5"></i> Home
+                    </a>
+                    <a th:href="@{/dashboard#quiz-section}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 flex items-center gap-1.5">
+                        <i data-lucide="brain-circuit" class="w-4.5 h-4.5"></i> Quiz
+                    </a>
+                    <a th:href="@{/upload}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 flex items-center gap-1.5">
+                        <i data-lucide="upload-cloud" class="w-4.5 h-4.5"></i> Upload
+                    </a>
+                    <a th:href="@{/settings}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 flex items-center gap-1.5">
+                        <i data-lucide="settings" class="w-4.5 h-4.5"></i> Settings
+                    </a>
+                </div>
+
+                <!-- User Profile & Logout (Desktop) -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <div sec:authorize="isAuthenticated()" class="flex items-center space-x-2 text-sm text-gray-400">
+                        <i data-lucide="user" class="w-4 h-4 text-indigo-400"></i>
+                        <span class="font-medium text-gray-200" sec:authentication="name">User</span>
+                    </div>
+                    
+                    <div sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" class="inline">
+                            <button type="submit" class="inline-flex items-center justify-center px-4 py-2 border border-red-500/30 hover:border-red-500/60 rounded-lg text-sm font-semibold text-red-400 hover:bg-red-500/10 transition duration-150 gap-1.5">
+                                <i data-lucide="log-out" class="w-4.5 h-4.5"></i> Logout
                             </button>
                         </form>
-                    </li>
-                </ul>
+                    </div>
+                </div>
+
+                <!-- Hamburger Mobile Toggle (Mobile) -->
+                <div class="flex md:hidden items-center" sec:authorize="isAuthenticated()">
+                    <button id="mobileMenuToggleBtn" class="text-gray-400 hover:text-white focus:outline-none p-2 rounded-md">
+                        <i data-lucide="menu" id="hamburgerIcon" class="w-6 h-6"></i>
+                        <i data-lucide="x" id="closeMenuIcon" class="w-6 h-6 hidden"></i>
+                    </button>
+                </div>
             </div>
         </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobileMenuPanel" class="hidden md:hidden border-t border-white/5 bg-[#070a13]/95 backdrop-blur-md px-4 pt-2 pb-4 space-y-2">
+            <a th:href="@{/dashboard}" class="block text-gray-300 hover:text-white px-3 py-2 rounded-lg text-base font-medium transition duration-150 flex items-center gap-2">
+                <i data-lucide="home" class="w-5 h-5 text-indigo-400"></i> Home
+            </a>
+            <a th:href="@{/dashboard#quiz-section}" class="block text-gray-300 hover:text-white px-3 py-2 rounded-lg text-base font-medium transition duration-150 flex items-center gap-2">
+                <i data-lucide="brain-circuit" class="w-5 h-5 text-indigo-400"></i> Quiz
+            </a>
+            <a th:href="@{/upload}" class="block text-gray-300 hover:text-white px-3 py-2 rounded-lg text-base font-medium transition duration-150 flex items-center gap-2">
+                <i data-lucide="upload-cloud" class="w-5 h-5 text-indigo-400"></i> Upload
+            </a>
+            <a th:href="@{/settings}" class="block text-gray-300 hover:text-white px-3 py-2 rounded-lg text-base font-medium transition duration-150 flex items-center gap-2">
+                <i data-lucide="settings" class="w-5 h-5 text-indigo-400"></i> Settings
+            </a>
+            
+            <div class="border-t border-white/5 pt-3 mt-3 flex items-center justify-between">
+                <div class="flex items-center space-x-2 text-sm text-gray-400 px-3">
+                    <i data-lucide="user" class="w-4 h-4 text-indigo-400"></i>
+                    <span class="font-medium text-gray-200" sec:authentication="name">User</span>
+                </div>
+                <form th:action="@{/logout}" method="post" class="inline">
+                    <button type="submit" class="inline-flex items-center justify-center px-4 py-2 border border-red-500/30 hover:border-red-500/60 rounded-lg text-sm font-semibold text-red-400 hover:bg-red-500/10 transition duration-150 gap-1.5">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const toggleBtn = document.getElementById("mobileMenuToggleBtn");
+                const mobileMenu = document.getElementById("mobileMenuPanel");
+                const hamburger = document.getElementById("hamburgerIcon");
+                const closeIcon = document.getElementById("closeMenuIcon");
+
+                if (toggleBtn) {
+                    toggleBtn.addEventListener("click", () => {
+                        const isHidden = mobileMenu.classList.contains("hidden");
+                        if (isHidden) {
+                            mobileMenu.classList.remove("hidden");
+                            hamburger.classList.add("hidden");
+                            closeIcon.classList.remove("hidden");
+                        } else {
+                            mobileMenu.classList.add("hidden");
+                            hamburger.classList.remove("hidden");
+                            closeIcon.classList.add("hidden");
+                        }
+                    });
+                }
+            });
+        </script>
     </nav>
 
-    <!-- 2. Chatbot Tutor widget (available everywhere) -->
+    <!-- Chatbot Tutor Fragment -->
     <div th:fragment="chatbot" sec:authorize="isAuthenticated()">
         <!-- Floating Toggle Button -->
         <div class="chatbot-widget-container">
             <button id="chatToggleBtn" class="chat-toggle-btn" title="Open Tutor Chat">
-                <i class="fa-solid fa-robot"></i>
+                <i data-lucide="message-square" class="w-6 h-6"></i>
             </button>
         </div>
 
         <!-- Tutor Chat Sidebar Panel -->
-        <div id="chatPanel" class="chat-panel glass-card">
-            <div class="chat-header">
-                <div class="d-flex align-items-center">
-                    <i class="fa-solid fa-robot me-2 fs-5"></i>
+        <div id="chatPanel" class="chat-panel glass-card flex flex-col hidden">
+            <div class="chat-header flex items-center justify-between p-4 gradient-btn rounded-t-2xl">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="bot" class="w-6 h-6"></i>
                     <div>
-                        <h6 class="mb-0 brand-font">Chatbot Tutor</h6>
-                        <small style="font-size: 0.75rem; opacity: 0.8;">Active Guided Tutor</small>
+                        <h6 class="font-outfit font-semibold mb-0 text-white leading-tight">Chatbot Tutor</h6>
+                        <span class="text-[10px] opacity-90 block">Active AI Concept Guide</span>
                     </div>
                 </div>
-                <button id="closeChatBtn" class="btn-close btn-close-white" aria-label="Close"></button>
+                <button id="closeChatBtn" class="text-white hover:text-gray-200 focus:outline-none">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
             
-            <div id="chatBody" class="chat-body">
-                <div class="text-center text-muted py-5">
-                    <i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i>
-                    <p class="mb-0 small">Loading chat history...</p>
+            <div id="chatBody" class="chat-body flex-1 overflow-y-auto p-4 bg-slate-950/95 space-y-4">
+                <div class="flex flex-col items-center justify-center py-10 text-gray-400">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mb-2"></div>
+                    <span class="text-xs">Connecting to chatbot tutor...</span>
                 </div>
             </div>
             
-            <div class="chat-footer">
-                <div class="input-group">
-                    <input type="text" id="chatInput" class="form-control chat-input" placeholder="Ask a hint or concept..." autocomplete="off">
-                    <button id="sendChatBtn" class="btn btn-primary-glow px-3" type="button">
-                        <i class="fa-solid fa-paper-plane"></i>
+            <div class="chat-footer p-3 bg-slate-900 border-t border-white/5 rounded-b-2xl">
+                <div class="flex gap-2">
+                    <input type="text" id="chatInput" class="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="Ask a hint or concept..." autocomplete="off">
+                    <button id="sendChatBtn" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition duration-150 flex items-center justify-center">
+                        <i data-lucide="send" class="w-4 h-4"></i>
                     </button>
                 </div>
             </div>
@@ -99,8 +206,31 @@
         <!-- Chatbot and Core JavaScripts -->
         <script th:src="@{/js/chatbot.js}"></script>
         <script th:src="@{/js/app.js}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Initialize Lucide icons on load
+            document.addEventListener("DOMContentLoaded", () => {
+                lucide.createIcons();
+            });
+        </script>
     </div>
+
+    <!-- Footer -->
+    <footer th:fragment="footer" class="bg-slate-950 border-t border-white/5 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex flex-col items-center justify-between gap-4 sm:flex-row text-gray-500 text-sm">
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-500"></i>
+                    <span class="font-outfit font-bold text-gray-400">Learning Quiz Application</span> &copy; 2026. All rights reserved.
+                </div>
+                <div class="flex space-x-6">
+                    <a th:href="@{/dashboard}" class="hover:text-gray-300 transition duration-150">Home</a>
+                    <a th:href="@{/upload}" class="hover:text-gray-300 transition duration-150">Upload</a>
+                    <a th:href="@{/settings}" class="hover:text-gray-300 transition duration-150">Settings</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
 </body>
 </html>
+
